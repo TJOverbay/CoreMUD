@@ -3,7 +3,7 @@ using App.Common;
 
 namespace CoreMUD.Core
 {
-    public abstract class TurnBasedObject : ITurnBased, INamedObject
+    public abstract class TurnBasedObject : ITurnBased
     {
         private int _totalTurnCount;
         private bool _isInTurn;
@@ -24,14 +24,12 @@ namespace CoreMUD.Core
             }
         }
 
-        protected string Name { get; set; }
-
         void ITurnBased.EndTurn()
         {
             if (!_isInTurn)
             {
                 throw new InvalidOperationException(
-                    $"This {Name.ToStringOrDefault("object")} is not in a turn");
+                    "This object is not in a turn");
             }
 
             _isInTurn = false;
@@ -43,7 +41,7 @@ namespace CoreMUD.Core
             if (_isInTurn)
             {
                 throw new InvalidOperationException(
-                    $"This {Name.ToStringOrDefault("object")} is already in a turn");
+                    "This object is already in a turn");
             }
 
             _isInTurn = true;

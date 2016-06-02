@@ -8,12 +8,11 @@ namespace CoreMUD.Core.Input
         private readonly IInputComponent _decorated;
 
         public TurnBasedInputComponentDecorator(IInputComponent decoratedComponent)
-            : base(string.IsNullOrWhiteSpace(decoratedComponent?.Name) ? "input component" : decoratedComponent.Name)
         {
             _decorated = decoratedComponent;
         }
 
-        protected override string Name
+        public string Name
         {
             get { return _decorated.Name; }
             set { _decorated.Name = value; }

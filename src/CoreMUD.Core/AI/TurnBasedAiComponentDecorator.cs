@@ -6,7 +6,6 @@
         private readonly IAiComponent _decorated;
 
         public TurnBasedAiComponentDecorator(IAiComponent decoratedComponent)
-            : base(string.IsNullOrWhiteSpace(decoratedComponent?.Name) ? "AI component" : decoratedComponent.Name)
         {
             _decorated = decoratedComponent;
         }
