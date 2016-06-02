@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using CoreMUD.Model;
 
 namespace CoreMUD.Core
 {
@@ -22,8 +21,30 @@ namespace CoreMUD.Core
 
         private static Server _instance;
 
+        private readonly ObservableCollection<ISystem> _systems;
+
         public Server()
         {
+            _systems = new ObservableCollection<ISystem>();
+            _systems.CollectionChanged += (sender, e) =>
+            {
+                switch (e.Action)
+                {
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                        break;
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                        break;
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                        break;
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                        break;
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                        break;
+                    default:
+                        break;
+                }
+            };
+
             if (_instance != null)
             {
                 throw new InvalidOperationException(
@@ -83,7 +104,7 @@ namespace CoreMUD.Core
                 _gameTimer = Stopwatch.StartNew();
             }
 
-            BeginRun();
+            _isRunning = BeginRun();
 
             while (_isRunning)
             {
@@ -93,9 +114,35 @@ namespace CoreMUD.Core
             EndRun();
         }
 
-        private void EndRun()
+        private void DoInitialize()
         {
-            throw new NotImplementedException();
+            BeginInitialize();
+
+            Initialize();
+
+            EndInitialize();
+        }
+
+        private void BeginInitialize()
+        {
+
+        }
+
+        protected virtual void Initialize() { }
+
+        private void EndInitialize()
+        {
+
+        }
+
+        protected virtual bool BeginRun()
+        {
+            return true;
+        }
+
+        protected virtual void EndRun()
+        {
+           
         }
 
         private void Tick()
@@ -181,49 +228,25 @@ namespace CoreMUD.Core
         {
             if (BeforeUpdate(gameTime))
             {
-                DoUpdate(gameTime);
+                Update(gameTime);
                 AfterUpdate();
             }
 
         }
 
-        private void AfterUpdate()
+        protected virtual bool BeforeUpdate(GameTime gameTime)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
-        private bool BeforeUpdate(GameTime gameTime)
+        private void Update(GameTime gameTime)
         {
-            throw new NotImplementedException();
+            // _systems.OfType<ITurnBased>().All(s => s.IsInTurn)
         }
 
-        private void BeginRun()
+        protected virtual void AfterUpdate()
         {
-            throw new NotImplementedException();
-        }
 
-        private void DoInitialize()
-        {
-            BeforInitialize();
-
-            Initialize();
-
-            EndInitialize();
-        }
-
-        private void EndInitialize()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void Initialize()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void BeforInitialize()
-        {
-            throw new NotImplementedException();
         }
     }
 }

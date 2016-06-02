@@ -7,9 +7,8 @@ namespace CoreMUD.Core
 {
     public interface ISystem
     {
-        // Called by the server every frame, whether or not the server is 
-        // turn-based.
-        void Tick();
+        // Called by the server every frame
+        void Update(GameTime gameTime);
     }
 
     public interface ISystem<TComponent> : ISystem where TComponent : IComponent
