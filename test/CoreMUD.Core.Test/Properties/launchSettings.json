@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CoreMUD.Core.Test": {
+      "commandName": "Project",
+      "commandLineArgs": "-wait"
+    }
+  }
+}
