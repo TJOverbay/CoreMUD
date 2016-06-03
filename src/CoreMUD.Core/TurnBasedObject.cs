@@ -24,7 +24,7 @@ namespace CoreMUD.Core
             }
         }
 
-        void ITurnBased.EndTurn()
+        protected void EndTurn()
         {
             if (!_isInTurn)
             {

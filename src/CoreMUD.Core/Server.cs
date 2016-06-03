@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -22,6 +23,8 @@ namespace CoreMUD.Core
         private static Server _instance;
 
         private readonly ObservableCollection<ISystem> _systems;
+        private readonly List<ITurnBased> _turnBasedSystems =
+            new List<ITurnBased>();
 
         public Server()
         {
@@ -31,14 +34,17 @@ namespace CoreMUD.Core
                 switch (e.Action)
                 {
                     case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
-                        break;
-                    case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                        OnSystemsAdded(e.NewItems);
                         break;
                     case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                        OnSystemsRemoved(e.OldItems);
                         break;
                     case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                        OnSystemsRemoved(e.OldItems);
+                        OnSystemsAdded(e.NewItems);
                         break;
                     case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                        OnSystemsReset();
                         break;
                     default:
                         break;
@@ -54,6 +60,33 @@ namespace CoreMUD.Core
             IsFixedTimeStep = true;
 
             _instance = this;
+        }
+
+        private void OnSystemsReset()
+        {
+            foreach (var system in _turnBasedSystems)
+            {
+                system.ResetTurns();
+            }
+            _turnBasedSystems.Clear();
+        }
+
+        private void OnSystemsRemoved(IList oldItems)
+        {
+            foreach (var systemToRemove in oldItems.OfType<ITurnBased>())
+            {
+                systemToRemove.ResetTurns();
+                _turnBasedSystems.Remove(systemToRemove);
+            }
+        }
+
+        private void OnSystemsAdded(IList newItems)
+        {
+            foreach (var systemToAdd in newItems.OfType<ITurnBased>())
+            {
+                systemToAdd.ResetTurns();
+                _turnBasedSystems.Add(systemToAdd);
+            }
         }
 
         internal static Server Instance { get { return _instance; } }
@@ -132,7 +165,10 @@ namespace CoreMUD.Core
 
         private void EndInitialize()
         {
-
+            foreach (var system in _turnBasedSystems)
+            {
+                system.ResetTurns();
+            }
         }
 
         protected virtual bool BeginRun()
@@ -241,7 +277,27 @@ namespace CoreMUD.Core
 
         private void Update(GameTime gameTime)
         {
-            // _systems.OfType<ITurnBased>().All(s => s.IsInTurn)
+            if (_turnBasedSystems.All(s => !s.IsInTurn))
+            {
+                foreach (var system in _turnBasedSystems)
+                {
+                    system.StartTurn();
+                }
+            }
+
+            foreach (var system in _systems)
+            {
+                system.Update(gameTime);
+            }
+
+            //// Let the turn-based systems end their own turns?
+            //if (_turnBasedSystems.All(s => !s.IsInTurn))
+            //{
+            //    foreach (var system in _turnBasedSystems)
+            //    {
+            //        system.EndTurn();
+            //    }
+            //}
         }
 
         protected virtual void AfterUpdate()

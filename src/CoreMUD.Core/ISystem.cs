@@ -13,7 +13,7 @@ namespace CoreMUD.Core
 
     public interface ISystem<TComponent> : ISystem where TComponent : IComponent
     {
-        void RegisterComponent(int entityId, TComponent component);
+        void AddComponent(int entityId, TComponent component);
         IEnumerable<TComponent> GetComponents();
         TComponent this[int entityId] { get; }
     }

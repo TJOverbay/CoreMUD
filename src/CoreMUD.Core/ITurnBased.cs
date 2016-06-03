@@ -9,7 +9,6 @@ namespace CoreMUD.Core
     {
         void StartTurn();
         bool IsInTurn { get; }
-        void EndTurn();
         void ResetTurns();
         int TotalTurnCount { get; }
     }
