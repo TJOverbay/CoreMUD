@@ -16,15 +16,13 @@ namespace CoreMUD.Core
         private long _previousTicks;
         private readonly GameTime _gameTime = new GameTime();
         private int _updateFrameLag;
-        private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(166667); // 60pfs
+        private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(83333); // 30pfs
         private TimeSpan _inactiveSleepTime = TimeSpan.FromSeconds(0.02);
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
 
         private static Server _instance;
 
         private readonly ObservableCollection<ISystem> _systems;
-        private readonly List<ITurnBased> _turnBasedSystems =
-            new List<ITurnBased>();
 
         public Server()
         {
@@ -64,11 +62,11 @@ namespace CoreMUD.Core
 
         private void OnSystemsReset()
         {
-            foreach (var system in _turnBasedSystems)
-            {
-                system.ResetTurns();
-            }
-            _turnBasedSystems.Clear();
+            //foreach (var system in _turnBasedSystems)
+            //{
+            //    system.ResetTurns();
+            //}
+            //_turnBasedSystems.Clear();
         }
 
         private void OnSystemsRemoved(IList oldItems)
@@ -76,7 +74,7 @@ namespace CoreMUD.Core
             foreach (var systemToRemove in oldItems.OfType<ITurnBased>())
             {
                 systemToRemove.ResetTurns();
-                _turnBasedSystems.Remove(systemToRemove);
+                //_turnBasedSystems.Remove(systemToRemove);
             }
         }
 
@@ -85,7 +83,7 @@ namespace CoreMUD.Core
             foreach (var systemToAdd in newItems.OfType<ITurnBased>())
             {
                 systemToAdd.ResetTurns();
-                _turnBasedSystems.Add(systemToAdd);
+                //_turnBasedSystems.Add(systemToAdd);
             }
         }
 
@@ -165,10 +163,10 @@ namespace CoreMUD.Core
 
         private void EndInitialize()
         {
-            foreach (var system in _turnBasedSystems)
-            {
-                system.ResetTurns();
-            }
+            //foreach (var system in _turnBasedSystems)
+            //{
+            //    system.ResetTurns();
+            //}
         }
 
         protected virtual bool BeginRun()
@@ -277,13 +275,13 @@ namespace CoreMUD.Core
 
         private void Update(GameTime gameTime)
         {
-            if (_turnBasedSystems.All(s => !s.IsInTurn))
-            {
-                foreach (var system in _turnBasedSystems)
-                {
-                    system.StartTurn();
-                }
-            }
+            //if (_turnBasedSystems.All(s => !s.IsInTurn))
+            //{
+            //    foreach (var system in _turnBasedSystems)
+            //    {
+            //        system.StartTurn();
+            //    }
+            //}
 
             foreach (var system in _systems)
             {

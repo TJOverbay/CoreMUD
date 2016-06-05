@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CoreMUD.ECS;
+﻿using System.Linq;
 using System.Reflection;
 
 namespace CoreMUD.ECS.Test.Component
