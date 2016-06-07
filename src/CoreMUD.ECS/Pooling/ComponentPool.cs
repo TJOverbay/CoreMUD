@@ -22,7 +22,7 @@ namespace CoreMUD.ECS.Pooling
         private readonly Type _innerType;
         private ConcurrentBag<T> _invalidComponents;
         private T[] _components;
-        private object _lock = new object();
+        private readonly object _lock = new object();
         private T _dummy;
 
         /// <summary>
@@ -90,13 +90,16 @@ namespace CoreMUD.ECS.Pooling
         {
             get
             {
-                return _components.Length - InvalidCount;
+                lock (_lock)
+                {
+                    return _components.Length - InvalidCount;
+                }
             }
         }
 
-        /// <summary>Returns a valid object at the given index.</summary>
+        /// <summary>Returns a valid component at the given index.</summary>
         /// <param name="index">The index of the component to return.</param>
-        /// <returns>A valid object at the specified index.</returns>
+        /// <returns>A valid component at the specified index.</returns>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown if the index is outside the range [0, <see cref="ValidCount"/>].
         /// </exception>
@@ -106,15 +109,18 @@ namespace CoreMUD.ECS.Pooling
             get
             {
                 index += InvalidCount;
-                index.ThrowIfNotInRangeExclusive(InvalidCount, _components.Length - 1, nameof(index),
-                    $"The index must be less than or equal to {ValidCount}");
+                index.ThrowIfNotInRangeInclusive(InvalidCount, _components.Length - 1, nameof(index),
+                    $"The index must be at least 0 and less than ValidCount ({ValidCount})");
 
-                return _components[index];
+                lock (_lock)
+                {
+                    return _components[index];
+                }
             }
         }
 
         /// <summary>
-        /// Cleans up the pool by checking each valid object 
+        /// Cleans up the pool by checking each valid component 
         /// to ensure it is still actually valid.
         /// <para>
         /// Must be called regularly to free returned Components.
@@ -168,7 +174,7 @@ namespace CoreMUD.ECS.Pooling
         /// Thrown if the specified factory function returned a null instance.
         /// </exception>
 
-        public bool TryCreate(out T newComponent)
+        public bool TryNew(out T newComponent)
         {
             lock (_lock)
             {
@@ -219,17 +225,22 @@ namespace CoreMUD.ECS.Pooling
 
         private void ResizeComponentArray(int resizeAmount)
         {
-            // Create a new array with an incrmented size and copy over the existing components
-            T[] newComponents = new T[_components.Length + resizeAmount];
+            T[] newComponents;
 
-            for (int i = _components.Length - 1; i >= 0; --i)
+            lock (_lock)
             {
-                if (i >= InvalidCount)
-                {
-                    _components[i].PoolId = i + resizeAmount;
-                }
+                // Create a new array with an incrmented size and copy over the existing components
+                newComponents = new T[_components.Length + resizeAmount];
 
-                newComponents[i + resizeAmount] = _components[i];
+                for (int i = _components.Length - 1; i >= 0; --i)
+                {
+                    if (i >= InvalidCount)
+                    {
+                        _components[i].PoolId = i + resizeAmount;
+                    }
+
+                    newComponents[i + resizeAmount] = _components[i];
+                }
             }
 
             Interlocked.Exchange(ref _components, newComponents);

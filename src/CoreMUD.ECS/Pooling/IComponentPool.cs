@@ -29,7 +29,7 @@
         /// True if a new Component could be created from the pool; otherwise, false.
         /// </returns>
 
-        bool TryCreate(out T newComponent);
+        bool TryNew(out T newComponent);
         
         /// <summary>
         /// Returns the Component to the pool so that it can be reused.
